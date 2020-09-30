@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>骑手表单</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+</head>
+<body>
+    <script src="https://webapi.amap.com/maps?v=1.4.15&key=c9153e2a7d9420953bcafb9ca3404cec"></script>
+    <!-- 加载地图JSAPI脚本 -->
+    <div id='app'>
+        <!-- <div id="container"></div> -->
+        <!-- :style="{opacity: isShow?0.3:0.3}" -->
+        <div v-show="isShow"  id="mask" @click="hiddenMask"> 
+            
+        </div>
+        <div v-show="isShow"   id="container"></div>
+        
+        <div style="text-align: right; padding: 20px 10px;">
+            <el-button type="primary" @click="showAllMark">查看所有骑手位置</el-button>
+        </div>
+        
+        <template>
+            <el-table
+                :data="horsemenList.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
+                border
+                stripe
+                style="width: 100%">
+                <el-table-column
+                    fixed
+                    prop="id"
+                    label="配送员id"
+                    width="120"
+                    align="center"
+                    >
+                </el-table-column>
+                <el-table-column
+                    prop="createTime"
+                    label="注册时间"
+                    width="300"
+                    align="center"
+                    >
+                </el-table-column>
+                
+                <el-table-column
+                    prop="realName"
+                    label="配送员姓名"
+                    width="120"
+                    align="center"
+                    >
+                </el-table-column>
+                <el-table-column
+                    prop="phone"
+                    label="配送员手机"
+                    width="120"
+                    align="center"
+                    >
+                </el-table-column>
+                <el-table-column
+                    prop="address"
+                    label="地址"
+                    align="center"
+                    >
+                </el-table-column>
+                
+                <el-table-column
+                    fixed="right"
+                    label="操作"
+                    width="150"
+                    align="center"
+                    >
+                    <template slot-scope="scope">
+                        <el-button @click="handleClick(scope.row)" type="text" size="small">查看位置</el-button>
+                        <!-- <el-button type="text" size="small">编辑</el-button> -->
+                    </template>
+                </el-table-column>
+            </el-table>
+            <el-pagination background
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="currentPage"
+                :page-sizes="[10, 20, 50, 100]"
+                :page-size="pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total"
+                style="text-align: right;margin-bottom: 50px;"
+                >
+            </el-pagination>
+
+        </template>
+    </div>
+    
+</body>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script type="text/javascript" src="../js/vue.js"></script>
+<script type="text/javascript" src="../js/config.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+
+<script type="text/javascript">
+</script>
+
+<script>
+    var vm = new Vue({
+      el: '#app',
+      data(){
+        return{
+            horsemenList: [
+            //     {
+            //     "address": "北海路", //地址
+            //     "appOpenid": "",
+            //     "appPhone": "",
+            //     "bond": "",
+            //     "cardId": "510129200111126795",//身份证cardId
+            //     "createTime": "2020-05-06 08:55:10",//注册时间
+            //     "headPhoto": "4https://huibuy.oss-cn-hangzhou.aliyuncs.com/files/20912572971824.png",// 头像
+            //     "id": 75,// 配送员ID
+            //     "money": 182.5000,
+            //     "nickName": "",
+            //     "openid": "",
+            //     "phone": "15258558706",//配送员手机号
+            //     "realName": "陈杨",//配送员姓名
+            //     "runStatus": 0,
+            //     "sex": "",
+            //     "status": 0,
+            //     "type": ""
+            // }
+            ],
+            currentPage: 1,
+　　　　　　 pageSize: 10,
+            total: 10,
+            record:{},
+            isShow:false,
+            map:'',
+            timerId:'',
+        } 
+      },
+      created(){
+    },
+      mounted (){
+        this.fetchData();
+
+        },
+      methods:{
+        // 每页条数切换
+        handleSizeChange(val){
+            this.pageSize = val;
+            // this.currentPage = 1;
+            // this.fetchData(1, val);
+            // handleCurrentChange(this.currentPage)
+        },
+        //页码切换
+        handleCurrentChange(val){
+            this.currentPage = val;
+            // this.fetchData(val, this.pageSize);
+            // this.fetchData(this.horsemenList, currentPage)
+        },
+
+        //请求表单数据
+        fetchData( ){
+            let _this = this
+            console.log('请求数据')
+            axios.get(getUrl()+'backstage/getPostmanList',{
+                // headers: {
+                //     'Content-Type': 'application/json',//设置请求头请求格式为JSON
+                // },
+                // params: {
+                //     param1: string,
+                //     param2: string
+                // },
+            })
+            .then(function(response) {
+                console.log(response);
+                console.log(response['data']['result']);
+                console.log(response['data']['result'].length);
+                // this.info = response
+                _this.horsemenList = response['data']['result'];
+                _this.total = response['data']['result'].length;
+
+            })
+            .catch(function (error) { // 请求失败处理
+                _this.$notify.error({
+                title: '错误',
+                message: error
+                });
+            });
+        },
+        hiddenMask(){
+            this.isShow = false
+            // clearTimeout(this.timerId)
+        },
+        showAllMark(){
+            let _this = this
+            _this.isShow = true
+            let map = new AMap.Map('container', {
+                resizeEnable: true, //是否监控地图容器尺寸变化
+                zoom:11, //初始化地图层级
+
+            });
+            for(let i =0; i<_this.horsemenList.length; i++){
+                let item = _this.horsemenList[i]
+                axios.get(getUrl()+'backstage/getPostmanLocation',{
+                    params: {
+                        postmanId: item.id,
+                    },
+                })
+                .then(function(response) {
+                    if(response.data.result!=''){
+                        _this.isShow = true
+                        let latitude = response.data.result['latitude'];
+                        let longitude = response.data.result['longitude'];
+                        let nowposition = new AMap.LngLat(longitude, latitude)
+                        let marker = new AMap.Marker({
+                            content: '<img src="../img/weizhi.png" style="width: 30px;height:30px" />',
+                            position:nowposition
+                        })
+                        console.log('marker',marker)
+                        let realName = item.realName
+                        console.log('realName',realName)
+                        marker.setTitle(realName);
+                        marker.setLabel({
+                            offset: new AMap.Pixel(-40, -30),  //设置文本标注偏移量
+                            content: `<div style="background-color: #ecf5ff;    color: #409eff;border: 1px solid #d9ecff;padding:3px">${ realName }</div>`, //设置文本标注内容
+                            // content: `<el-tag>${ realName }</el-tag>`, //设置文本标注内容
+                            direction: 'right' //设置文本标注方位
+                        });
+                        map.add(marker)
+                    }
+
+                })
+                .catch(function (error) { // 请求失败处理
+                });
+            }
+            // _this.timerId =  setTimeout(() => {
+            //     _this.showAllMark()
+            // }, 30000);
+
+        },
+        //查看路线
+        handleClick(record){
+            var that = this
+            console.log(record)
+            this.record = record
+            var _this = this
+            axios.get(getUrl()+'backstage/getPostmanLocation',{
+                // headers: {
+                //     'Content-Type': 'application/json',//设置请求头请求格式为JSON
+                // },
+                params: {
+                    postmanId: record.id,
+                },
+            })
+            .then(function(response) {
+                if(response.data.result!=''){
+                    _this.isShow = true
+                    console.log('isShow', _this.isShow)
+                    let latitude = response.data.result['latitude'];
+                    let longitude = response.data.result['longitude'];
+                    let position = new AMap.LngLat(longitude, latitude)
+                    let map = new AMap.Map('container', {
+                        resizeEnable: true, //是否监控地图容器尺寸变化
+                        zoom:16, //初始化地图层级
+                        center: [longitude, latitude],
+                    });
+                
+                    
+                    map.on("complete", function(){
+                        //地图描点
+                        var marker = new AMap.Marker({
+                            // icon: '../img/weizhi.png', // 添加 Icon 图标 URL
+                            content: '<img src="../img/weizhi.png" style="width: 30px;height:30px" />',
+                            // icon: "//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
+                            map:map,
+                            position:position
+                        })
+                        marker.setTitle(record.realName);
+                        marker.setLabel({
+                            offset: new AMap.Pixel(-40, -30),  //设置文本标注偏移量
+                            content: `<div style="background-color: #ecf5ff;    color: #409eff;border: 1px solid #d9ecff;padding:3px">${ record.realName }</div>`, //设置文本标注内容
+                            direction: 'right' //设置文本标注方位
+                        });
+                        
+                        // _this.timerId =  setTimeout(() => {
+                        //     _this.refushData(record)
+                        // }, 3000);
+                    });
+
+                    
+                }
+                else{
+                    const h = _this.$createElement;
+
+                    _this.$notify({
+                    title: '提示',
+                    message: h('i', { style: 'color: teal'}, '暂无位置信息')
+                    });
+                    this.isShow = false
+                }
+
+            })
+            .catch(function (error) { // 请求失败处理
+                _this.$notify.error({
+                title: '错误',
+                message: error
+                });
+            });
+
+           
+        },
+        
+        refushData(record){
+            console.log('刷新地图')
+            this.handleClick(record)
+        }
+     },
+    })
+
+</script>
+</html>

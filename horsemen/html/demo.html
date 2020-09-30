@@ -1,0 +1,248 @@
+ 
+博客 
+学院 
+下载
+论坛
+问答
+直播
+代码
+招聘
+VIP会员
+
+ 
+
+创作中心 
+
+
+登录/注册 
+ 
+欣欣的饼干
+
+
+
+码龄0年
+ 暂无认证 
+6
+原创
+29万+
+周排名
+64万+
+总排名
+395
+访问
+ 
+等级
+
+65
+积分
+2
+粉丝
+3
+获赞
+1
+评论
+0
+收藏
+ 
+TA的主页
+私信
+关注
+
+ 
+最新文章
+MYSQL获取各种时间
+隐藏url参数跳转新页面
+vue.js学习文档-自己学习的时候整理的
+注册-发送短信验证码功能开发
+五星评价案例-原生js和css
+分类专栏
+ 
+查询时间
+1篇
+ 
+隐藏url参数的跳转新页面
+1篇
+ 
+vue学习文档
+1篇
+ 
+短信验证码
+1篇
+ 
+页面样式
+1篇
+ 
+amap
+1篇
+
+归档
+2020
+09月
+5篇
+08月
+1篇
+热门文章
+高德地图展示后台接口数据marker与动态信息展示  168 
+注册-发送短信验证码功能开发  74 
+五星评价案例-原生js和css  59 
+vue.js学习文档-自己学习的时候整理的  38 
+隐藏url参数跳转新页面  25 
+最新评论
+高德地图展示后台接口数据marker与动态信息展示
+俏叔叔: 牛逼 
+
+
+高德地图展示后台接口数据marker与动态信息展示
+ 
+欣欣的饼干 2020-08-28 11:16:11  171  收藏 
+分类专栏： amap 文章标签： javascript 
+版权 
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>地图找机具</title>
+    <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
+    <!--设置信息窗体的样式-->
+    <style type="text/css">
+         html, body, #container {
+            height: 100%;
+            width: 100%;
+        }
+
+        .amap-icon img{
+            width: 25px;
+            height: 34px;
+        }
+        .input-card {
+		    display: flex;
+		    flex-direction: column;
+		    min-width: 0;
+		    background-color: #fff;
+		    background-clip: border-box; 
+		    width: 22rem;
+		    border-width: 0;
+		    border-radius: 0.4rem;
+		    box-shadow: 0 2px 6px 0 rgba(114, 124, 245, .5);
+		    position: fixed;
+		    bottom: 1rem;
+		    right: 1rem; 
+		    flex: 1 1 auto;
+		    padding: 0.75rem 1.25rem;
+        }
+        h4 {
+		    font-family: inherit;
+		    line-height: 1.8;
+		    font-weight: 300;
+		    color: inherit;
+		    font-size: 1.1rem;
+		    margin-top: 0;
+		    margin-bottom: .5rem;
+		}
+        .btn {
+		    display: inline-block;
+		    font-weight: 400;
+		    text-align: center;
+		    -moz-user-select: none;
+		    -ms-user-select: none;
+		    border: 1px solid transparent;
+		    color: #25A5F7;
+		    border-color: #25A5F7;
+		    padding: .25rem .5rem;
+		    line-height: 1.5;
+		    border-radius: 1rem;
+		    background-color: #25A5F7;
+		}
+    </style>
+    <script type="text/javascript"
+            src="https://webapi.amap.com/maps?v=1.4.15&key=c9153e2a7d9420953bcafb9ca3404cec"></script>
+</head>
+<body>
+<div id="container"></div>
+<div class="input-card">
+    <h4>地图自适应</h4>
+    <input id="setFitView" type="button" class="btn" value="地图自适应显示" />
+</div>
+<script type="text/javascript">
+	var map = new AMap.Map("container",{
+		resizeEnable:true,
+		center: [117.214418,31.809823]//地图中心位置
+	});	
+	map.clearMap();  
+	var markers = []; 
+	var infoWindow;
+    $(function() {
+      
+    	$.ajax({
+    		url: bonuspath + '/webPortal/show/gdMapShowEquip',
+    		type: 'post',
+    		dataType: 'json',
+    	 
+    		success:function(e) {
+    			//console.log("e.data=",e.obj.list);
+    			var marker;		
+    			for(var i=0 ; i< e.obj.list.length;i++){
+    				var jfong=[ e.obj.list[i].lastLon,e.obj.list[i].lastLat];	
+    				//console.log("jfong=",jfong);
+    					marker = new AMap.Marker({
+    				    position: jfong,
+    				    map:map
+    					});	
+    					//console.log("e.data[3]=",e.obj.list[3]);	
+    				marker.setMap(map);	
+    				 marker.icon = '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png';
+    				marker.leasePrice=e.obj.list[i].leasePrice;
+    				marker.currCity=e.obj.list[i].currCity;
+    				marker.typeName=e.obj.list[i].machineType.name;
+    				marker.parentTypeName=e.obj.list[i].machineType.parent.name;
+    				marker.supplyName=e.obj.list[i].supply.name;	
+    				//console.log(e.obj.list[i].supply.name);
+    				 marker.on('click', function(e){
+    					 //console.log("e=",e);
+    					 infoWindow.setContent("<div class='main'style='background-color:#fff;'><span> 机具名称： <span style='color:blue'>"+e.target.parentTypeName+e.target.typeName+"</span></span><br>" 
+    					         + "<span>  出租单价: <span style='color:blue'>"+e.target.leasePrice+"  </span></span><br>" 
+    					         + "<span>  所在地: <span style='color:blue'>"+e.target.currCity+"  </span></span><br>"
+    					         + "<span>  所属公司: <span style='color:blue'>"+e.target.supplyName+"  </span></span></div>" );
+    					 infoWindow.open(map, e.lnglat);
+    				 });
+    			    // 添加一些分布不均的点到地图上,地图上添加三个点标记，作为参照
+    			    markers.forEach(function(marker) {
+    			        new AMap.Marker({
+    			            map: map,
+    			            icon: marker.icon,
+    			            position: jfong,
+    			            offset: new AMap.Pixel(-13, -30)
+    			        });
+    			    });
+    				
+    			}	// for-end
+    			
+    			infoWindow = new AMap.InfoWindow({
+    				isCustom:	true,
+    				draggable: true,  //是否可拖动
+    		        offset: new AMap.Pixel(0, -31),
+    		        content:""
+    		    });
+    			
+    		}  			
+    	 
+    	}) 
+	})
+	
+	
+	    // 添加事件监听, 使地图自适应显示到合适的范围
+       // 添加事件监听, 使地图自适应显示到合适的范围
+    AMap.event.addDomListener(document.getElementById('setFitView'), 'click', function() {
+        var newCenter = map.setFitView();
+    });
+ 
+    //关闭信息窗体
+    function closeInfoWindow() {
+        map.clearInfoWindow();
+    }
+</script>
+	</body>
+</html>
+
+ 

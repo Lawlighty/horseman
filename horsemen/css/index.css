@@ -1,0 +1,50 @@
+#mask{
+    /* background-color: #d8d8d8; */
+    background-color: #000;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 100;
+    opacity:0.5
+}
+#container {
+    width:1000px; height: 800px; 
+    
+	/* border-radius: 20px; */
+	margin: auto;
+	position: absolute !important;
+	top: 0;
+	left: 0;
+	right: 0;
+    bottom: 0;
+    z-index: 999;
+}  
+
+.el-message-box{
+    width:800px; height: 600px; 
+}
+
+@media (max-width: 1000px) {
+    #container {
+        width:600px; height: 400px; 
+    }  
+
+    .el-message-box{
+        width:600px; height: 400px; 
+    }
+}
+@media (max-width: 1000px) {
+    #container {
+        width:600px; height: 400px; 
+    }  
+
+    .el-message-box{
+        width:600px; height: 400px; 
+    }
+}
+
+/* 标签 */
+.amap-marker-label{
+    border: none;
+    background-color: transparent !important;
+}
