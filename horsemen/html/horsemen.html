@@ -20,7 +20,8 @@
         <div v-show="isShow"   id="container"></div>
         
         <div style="text-align: right; padding: 20px 10px;">
-            <el-button type="primary" @click="showAllMark">查看所有骑手位置</el-button>
+            <el-button type="success" @click="showAllMark(true)">查看在线骑手位置</el-button>
+            <el-button type="primary" @click="showAllMark(false)">查看所有骑手位置</el-button>
         </div>
         
         <template>
@@ -73,7 +74,8 @@
                     align="center"
                     >
                     <template slot-scope="scope">
-                        <el-button @click="handleClick(scope.row)" type="text" size="small">查看位置</el-button>
+                        <el-button v-if="scope.row.runStatus!=-1" type="success" @click="handleClick(scope.row)" type="text" size="small">查看位置</el-button>
+                        <el-button v-if="scope.row.runStatus===-1"  type="text" size="small">未上线</el-button>
                         <!-- <el-button type="text" size="small">编辑</el-button> -->
                     </template>
                 </el-table-column>
@@ -192,7 +194,7 @@
             this.isShow = false
             // clearTimeout(this.timerId)
         },
-        showAllMark(){
+        showAllMark(isonline){
             let _this = this
             _this.isShow = true
             let map = new AMap.Map('container', {
@@ -201,7 +203,19 @@
 
             });
             for(let i =0; i<_this.horsemenList.length; i++){
-                let item = _this.horsemenList[i]
+                let item = {}
+                if(isonline){
+                    if( _this.horsemenList[i].runStatus===-1){
+                        continue
+                    }
+                    else{
+                        item = _this.horsemenList[i]
+                    }
+                }
+                else{
+                    item = _this.horsemenList[i]
+                }
+                
                 axios.get(getUrl()+'backstage/getPostmanLocation',{
                     params: {
                         postmanId: item.id,
@@ -214,7 +228,7 @@
                         let longitude = response.data.result['longitude'];
                         let nowposition = new AMap.LngLat(longitude, latitude)
                         let marker = new AMap.Marker({
-                            content: '<img src="../img/weizhi.png" style="width: 30px;height:30px" />',
+                            content: response.data.result['runStatus']===-1?'<img src="../img/weizhi_unactive.png" style="width: 30px;height:30px" />':'<img src="../img/weizhi.png" style="width: 30px;height:30px" />',
                             position:nowposition
                         })
                         console.log('marker',marker)
@@ -271,7 +285,7 @@
                         //地图描点
                         var marker = new AMap.Marker({
                             // icon: '../img/weizhi.png', // 添加 Icon 图标 URL
-                            content: '<img src="../img/weizhi.png" style="width: 30px;height:30px" />',
+                            content: response.data.result['runStatus']===-1?'<img src="../img/weizhi_unactive.png" style="width: 30px;height:30px" />':'<img src="../img/weizhi.png" style="width: 30px;height:30px" />',
                             // icon: "//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png",
                             map:map,
                             position:position
